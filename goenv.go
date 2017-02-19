@@ -83,9 +83,6 @@ func InGoroot(file string) bool {
 	if len(file) == 0 || file[0] == '?' {
 		return true
 	}
-	if runtime.GOOS == "windows" {
-		file = strings.ToLower(file)
-	}
 	return strings.HasPrefix(file, goRootSrc) || strings.HasSuffix(file, "/_testmain.go")
 }
 
@@ -106,9 +103,6 @@ func pcSrcPath(pc uintptr) string {
 	fn := runtime.FuncForPC(pc)
 	file, _ := fn.FileLine(pc)
 	src := file[:PkgIndex(file, fn.Name())]
-	if runtime.GOOS == "windows" {
-		src = strings.ToLower(src)
-	}
 	return src
 }
 
