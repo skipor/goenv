@@ -8,9 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/skipor/goenv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/skipor/goenv"
 )
 
 func TestSigpanic(t *testing.T) {
@@ -20,6 +21,8 @@ func TestSigpanic(t *testing.T) {
 }
 
 func TestGoRoot(t *testing.T) {
+	t.Log("file ", gorootIoGoFile)
+	t.Log("goroot ", goenv.GoRoot())
 	expectedGoRootSrc := strings.TrimSuffix(gorootIoGoFile, ioGoFileTrimmed)
 	assert.Equal(t, expectedGoRootSrc, goenv.GoRootSrc())
 	assert.Equal(t, ioGoFileTrimmed, goenv.TrimGoRootSrc(gorootIoGoFile))
@@ -28,8 +31,11 @@ func TestGoRoot(t *testing.T) {
 }
 
 func TestGoPath(t *testing.T) {
-	var file string
-	_, file, _, _ = runtime.Caller(0)
+	pc, file, _, _ := runtime.Caller(0)
+
+	t.Log("file ", file)
+	t.Log("gopath ", goenv.GoPath())
+	t.Log("func name ", runtime.FuncForPC(pc).Name())
 	require.True(t, strings.HasSuffix(file, thisFileTrimmed), file)
 	expectedGoPathSrc := strings.TrimSuffix(file, thisFileTrimmed)
 	assert.Equal(t, expectedGoPathSrc, goenv.GoPathSrc())

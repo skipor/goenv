@@ -14,5 +14,3 @@ before_install:
   - go get golang.org/x/tools/cmd/cover
 
 install: go get -t
-
-script: goveralls -service=travis-ci

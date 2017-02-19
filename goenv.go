@@ -19,6 +19,7 @@
 package goenv
 
 import (
+	"fmt"
 	"runtime"
 	"strings"
 )
@@ -102,6 +103,9 @@ var (
 func pcSrcPath(pc uintptr) string {
 	fn := runtime.FuncForPC(pc)
 	file, _ := fn.FileLine(pc)
+	fmt.Printf("File %s\nFunc: %s\n", file, fn.Name()) // TODO: remove
+	// HACK: Fails on travis otherwise.
+	file = strings.Replace(file, "/_obj/", "/", 1)
 	src := file[:PkgIndex(file, fn.Name())]
 	return src
 }
