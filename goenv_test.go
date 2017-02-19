@@ -22,6 +22,7 @@ func TestSigpanic(t *testing.T) {
 func TestGoRoot(t *testing.T) {
 	expectedGoRootSrc := strings.TrimSuffix(gorootIoGoFile, ioGoFileTrimmed)
 	assert.Equal(t, expectedGoRootSrc, goenv.GoRootSrc())
+	assert.Equal(t, ioGoFileTrimmed, goenv.TrimGoRootSrc(gorootIoGoFile))
 	assert.Equal(t, strings.TrimSuffix(expectedGoRootSrc, "src/"), goenv.GoRoot())
 	assert.True(t, goenv.InGoroot(gorootIoGoFile))
 }
@@ -32,6 +33,7 @@ func TestGoPath(t *testing.T) {
 	require.True(t, strings.HasSuffix(file, thisFileTrimmed), file)
 	expectedGoPathSrc := strings.TrimSuffix(file, thisFileTrimmed)
 	assert.Equal(t, expectedGoPathSrc, goenv.GoPathSrc())
+	assert.Equal(t, thisFileTrimmed, goenv.TrimGoPathSrc(file))
 	assert.Equal(t, strings.TrimSuffix(expectedGoPathSrc, "src/"), goenv.GoPath())
 	assert.False(t, goenv.InGoroot(file))
 }
