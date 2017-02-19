@@ -63,25 +63,19 @@ func PkgIndex(file, funcName string) int {
 	return i + len(sep)
 }
 
-func Goroot() string {
-	return goroot
+func GoRootSrc() string { return goRootSrc }
+func GoPathSrc() string { return goPathSrc }
+func GoRoot() string    { return goRoot }
+func GoPath() string    { return goPath }
+
+// TrimGoPathSrc trims compile time $GOPATH/src/
+func TrimGoPathSrc(path string) string {
+	return strings.TrimPrefix(path, GoPathSrc())
 }
 
-func Gopath() string {
-	return gopath
-}
-
-func Gosrc() string {
-	return gosrc
-}
-
-// TrimGosrc trims compile time $GOPATH/src/
-func TrimGosrc(path string) string {
-	return strings.TrimPrefix(path, Gopath())
-}
-
-func TrimGoroot(path string) string {
-	return strings.TrimPrefix(path, Goroot())
+// TrimGoRootSrc trims compile time $GOROOT/src/
+func TrimGoRootSrc(path string) string {
+	return strings.TrimPrefix(path, GoRootSrc())
 }
 
 // InGoroot returns true if file unknown, under GOROOT, or _testmain.go.
@@ -92,7 +86,7 @@ func InGoroot(file string) bool {
 	if runtime.GOOS == "windows" {
 		file = strings.ToLower(file)
 	}
-	return strings.HasPrefix(file, goroot) || strings.HasSuffix(file, "/_testmain.go")
+	return strings.HasPrefix(file, goRootSrc) || strings.HasSuffix(file, "/_testmain.go")
 }
 
 // Sigpanic returns runtime.sigpanic *runtime.Func.
@@ -102,24 +96,29 @@ func Sigpanic() *runtime.Func {
 
 // Compile time variables.
 var (
-	goroot string // $GOROOT
-	gopath string // $GOPATH
-	gosrc  string // $GOPATH/src/
+	goRootSrc string // $GOROOT/src/
+	goPathSrc string // $GOPATH/src/
+	goRoot    string
+	goPath    string
 )
 
-func init() {
-	// TODO: set gopath, gosrc
-	var pcs [1]uintptr
-	runtime.Callers(0, pcs[:])
-	fn := runtime.FuncForPC(pcs[0])
-	file, _ := fn.FileLine(pcs[0])
-
-	idx := PkgIndex(file, fn.Name())
-
-	goroot = file[:idx]
+func pcSrcPath(pc uintptr) string {
+	fn := runtime.FuncForPC(pc)
+	file, _ := fn.FileLine(pc)
+	src := file[:PkgIndex(file, fn.Name())]
 	if runtime.GOOS == "windows" {
-		goroot = strings.ToLower(goroot)
+		src = strings.ToLower(src)
 	}
+	return src
+}
+
+func init() {
+	var pcs [2]uintptr
+	runtime.Callers(0, pcs[:])
+	goRootSrc = pcSrcPath(pcs[0]) // runtime.Callers pc
+	goPathSrc = pcSrcPath(pcs[1]) // goenv.init pc
+	goRoot = strings.TrimSuffix(goRootSrc, "src/")
+	goPath = strings.TrimSuffix(goPathSrc, "src/")
 }
 
 // findSigpanic intentionally executes faulting code to generate a stack trace
